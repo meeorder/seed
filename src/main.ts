@@ -18,6 +18,8 @@ async function bootstrap() {
     dbName: process.env.MONGO_DB_NAME ?? 'meeorder',
   });
 
+  await mongoose.connection.db.dropDatabase();
+
   await addonModel.deleteMany({}).exec();
 
   const addonDocs: DocumentType<AddonSchema>[] = await addonModel.create(
@@ -49,16 +51,37 @@ async function bootstrap() {
 
   const addOnsIds = addonDocs.map((doc) => doc._id);
   await categoriesModel.deleteMany({}).exec();
+
+  const mainCategoryId = new Types.ObjectId(3000);
+  const dessertCategoryId = new Types.ObjectId(3001);
+  const fruitCategoryId = new Types.ObjectId(3002);
+  const drinkCategoryId = new Types.ObjectId(3003);
+  const otherCategoryId = new Types.ObjectId(3004);
   await categoriesModel.insertMany([
     {
       title: 'คาว',
       description: 'อาหารคาว',
-      _id: new Types.ObjectId(3000),
+      _id: mainCategoryId,
     },
     {
       title: 'หวาน',
       description: 'อาหารหวาน',
-      _id: new Types.ObjectId(3001),
+      _id: dessertCategoryId,
+    },
+    {
+      title: 'ผลไม้',
+      description: 'ผลไม้',
+      _id: fruitCategoryId,
+    },
+    {
+      title: 'เครื่องดื่ม',
+      description: 'เครื่องดื่ม',
+      _id: drinkCategoryId,
+    },
+    {
+      title: 'อื่นๆ',
+      description: 'อื่นๆ',
+      _id: otherCategoryId,
     },
   ]);
 
@@ -89,37 +112,104 @@ async function bootstrap() {
   ]);
 
   await menuModel.deleteMany({}).exec();
+  const mainFoodNames = [
+    'ข้าวผัดกะเพราหมูกรอบ',
+    'ข้าวไข่เจียวหมูสับ',
+    'ข้าวผัดหมู',
+    'ข้าวผัดกุ้ง',
+    'ข้าวผัดกุ้งทะเล',
+    'ข้าวผัดปู',
+    'ไก่ผัดกระเทียม',
+    'หมูผัดกระเทียม',
+    'หมูผัดพริกเผา',
+  ];
+
+  const dessertFoodNames = [
+    'ข้าวเหนียวมะม่วง',
+    'ข้าวเหนียวทุเรียน',
+    'ข้าวเหนียวสังขยา',
+    'ไอศกรีม',
+    'เครป',
+    'เครปชีส',
+    'เครปสตรอเบอร์รี่',
+    'เครปช็อคโกแลต',
+  ];
+
+  const fruitFoodNames = [
+    'มะละกอ',
+    'มะม่วง',
+    'ทุเรียน',
+    'ส้ม',
+    'ส้มโอ',
+    'แตงโม',
+    'กล้วย',
+  ];
+
+  const drinkFoodNames = [
+    'น้ำเปล่า',
+    'น้ำอัดลม',
+    'น้ำส้ม',
+    'โค้ก',
+    'ชา',
+    'ชาเย็น',
+    'ชานม',
+    'ชามะนาว',
+  ];
+
+  const otherFoodNames = ['ถั่วทอด', 'ไข่ต้ม', 'ไข่เยี่ยวม้า', 'น้ำพริก'];
+
   await menuModel.insertMany([
-    {
+    ...mainFoodNames.map((name, i) => ({
       addons: addOnsIds,
-      category: new Types.ObjectId(3000),
-      description: 'ข้าวผัดกะเพราหมูกรอบ',
-      image: 'https://source.unsplash.com/random/?food&plate&11',
-      name: 'ข้าวผัดกะเพราหมูกรอบ',
-      price: 35,
-      rank: 1,
+      category: mainCategoryId,
+      description: name + ' อร่อยมาก' + i + ' อร่อยมาก' + i + ' อร่อยมาก' + i,
+      image: `https://source.unsplash.com/random/?food&plate&main&${i}`,
+      name,
+      price: 35 + i * 5,
+      rank: i,
       published_at: new Date(),
-    },
-    {
+    })),
+    ...dessertFoodNames.map((name, i) => ({
       addons: addOnsIds,
-      category: new Types.ObjectId(3000),
-      description: 'ข้าวไข่เจียวหมูสับ',
-      image: 'https://source.unsplash.com/random/?food&plate&12',
-      name: 'ข้าวไข่เจียวหมูสับ',
-      price: 35,
-      rank: 2,
-      published_at: null,
-    },
-    {
-      addons: addOnsIds.slice(0, 3),
-      category: new Types.ObjectId(3001),
-      description: 'ข้าวเหนียวมะม่วง',
-      image: 'https://source.unsplash.com/random/?food&plate&13',
-      name: 'ข้าวเหนียวมะม่วง',
-      price: 100,
-      rank: null,
+      category: dessertCategoryId,
+      description: name + ' หวานมาก' + i + ' หวานมาก' + i + ' หวานมาก' + i,
+      image: `https://source.unsplash.com/random/?food&plate&dessert&${i}`,
+      name,
+      price: 10 + i * 2,
+      rank: i,
       published_at: new Date(),
-    },
+    })),
+    ...fruitFoodNames.map((name, i) => ({
+      addons: addOnsIds,
+      category: fruitCategoryId,
+      description: name + ' กรอบมาก' + i + ' กรอบมาก' + i + ' กรอบมาก' + i,
+      image: `https://source.unsplash.com/random/?food&plate&fruit&${i}`,
+      name,
+      price: 20 + i * 3,
+      rank: i,
+      published_at: new Date(),
+    })),
+    ...drinkFoodNames.map((name, i) => ({
+      addons: addOnsIds,
+      category: drinkCategoryId,
+      description:
+        name + ' สดชื่นมาก' + i + ' สดชื่นมาก' + i + ' สดชื่นมาก' + i,
+      image: `https://source.unsplash.com/random/?food&plate&drink&${i}`,
+      name,
+      price: 10 + i * 2,
+      rank: i,
+      published_at: new Date(),
+    })),
+    ...otherFoodNames.map((name, i) => ({
+      addons: addOnsIds,
+      category: otherCategoryId,
+      description: name + ' อร่อยมาก' + i + ' อร่อยมาก' + i + ' อร่อยมาก' + i,
+      image: `https://source.unsplash.com/random/?food&plate&other&${i}`,
+      name,
+      price: 10 + i * 2,
+      rank: i,
+      published_at: new Date(),
+    })),
   ]);
 
   await mongoose.disconnect();
