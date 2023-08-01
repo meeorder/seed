@@ -6,7 +6,7 @@
   "private": true,
   "license": "UNLICENSED",
   "scripts": {
-    "seed": "ts-node -r tsconfig-paths/register src/seed.ts"
+    "seed": "ts-node ./src/main.ts"
   },
   "dependencies": {
     "@typegoose/typegoose": "^11.4.0",
