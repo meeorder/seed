@@ -12,7 +12,7 @@ export class MenuSchema {
   image: string;
 
   @Prop()
-  name: string;
+  title: string;
 
   @Prop()
   description: string;
