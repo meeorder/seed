@@ -18,10 +18,15 @@ async function bootstrap() {
     dbName: process.env.MONGO_DB_NAME ?? 'meeorder',
   });
 
+  /////////////////////////////////// DROP DATABASE  ///////////////////////////////////
   await mongoose.connection.db.dropDatabase();
 
-  await addonModel.deleteMany({}).exec();
+  /////////////////////////////////// INSERT TABLE  ///////////////////////////////////
+  await tableModel.insertMany(
+    Array.from({ length: 10 }, (_, i) => i + 1).map((i) => ({ _id: i })),
+  );
 
+  /////////////////////////////////// INSERT ADDON  ///////////////////////////////////
   const addonDocs: DocumentType<AddonSchema>[] = await addonModel.create(
     {
       title: 'เบคอน',
@@ -50,68 +55,15 @@ async function bootstrap() {
   );
 
   const addOnsIds = addonDocs.map((doc) => doc._id);
-  await categoriesModel.deleteMany({}).exec();
 
   const mainCategoryId = new Types.ObjectId(3000);
   const dessertCategoryId = new Types.ObjectId(3001);
   const fruitCategoryId = new Types.ObjectId(3002);
   const drinkCategoryId = new Types.ObjectId(3003);
   const otherCategoryId = new Types.ObjectId(3004);
-  await categoriesModel.insertMany([
-    {
-      title: 'คาว',
-      description: 'อาหารคาว',
-      _id: mainCategoryId,
-    },
-    {
-      title: 'หวาน',
-      description: 'อาหารหวาน',
-      _id: dessertCategoryId,
-    },
-    {
-      title: 'ผลไม้',
-      description: 'ผลไม้',
-      _id: fruitCategoryId,
-    },
-    {
-      title: 'เครื่องดื่ม',
-      description: 'เครื่องดื่ม',
-      _id: drinkCategoryId,
-    },
-    {
-      title: 'อื่นๆ',
-      description: 'อื่นๆ',
-      _id: otherCategoryId,
-    },
-  ]);
 
-  await tableModel.insertMany(
-    Array.from({ length: 10 }, (_, i) => i + 1).map((i) => ({ _id: i })),
-  );
+  /////////////////////////////////// INSERT MENU  ///////////////////////////////////
 
-  await sessionModel.deleteMany({}).exec();
-  await sessionModel.insertMany([
-    {
-      table: 1,
-      uid: v4(),
-      finished_at: new Date(1),
-      _id: new Types.ObjectId(1),
-    },
-    {
-      table: 2,
-      uid: v4(),
-      finished_at: new Date(100),
-      _id: new Types.ObjectId(99),
-    },
-    {
-      table: 1,
-      uid: null,
-      finished_at: new Date(103),
-      _id: new Types.ObjectId(100),
-    },
-  ]);
-
-  await menuModel.deleteMany({}).exec();
   const mainFoodNames = [
     'ข้าวผัดกะเพราหมูกรอบ',
     'ข้าวไข่เจียวหมูสับ',
@@ -160,36 +112,37 @@ async function bootstrap() {
 
   await menuModel.insertMany([
     ...mainFoodNames.map((name, i) => ({
+      _id: i + 1,
       addons: addOnsIds,
       category: mainCategoryId,
       description: name + ' อร่อยมาก' + i + ' อร่อยมาก' + i + ' อร่อยมาก' + i,
       image: `https://source.unsplash.com/random/?food&plate&main&${i}`,
       name,
       price: 35 + i * 5,
-      rank: i,
       published_at: new Date(),
     })),
     ...dessertFoodNames.map((name, i) => ({
+      _id: i + 100,
       addons: addOnsIds,
       category: dessertCategoryId,
       description: name + ' หวานมาก' + i + ' หวานมาก' + i + ' หวานมาก' + i,
       image: `https://source.unsplash.com/random/?food&plate&dessert&${i}`,
       name,
       price: 10 + i * 2,
-      rank: i,
       published_at: new Date(),
     })),
     ...fruitFoodNames.map((name, i) => ({
+      _id: i + 200,
       addons: addOnsIds,
       category: fruitCategoryId,
       description: name + ' กรอบมาก' + i + ' กรอบมาก' + i + ' กรอบมาก' + i,
       image: `https://source.unsplash.com/random/?food&plate&fruit&${i}`,
       name,
       price: 20 + i * 3,
-      rank: i,
       published_at: new Date(),
     })),
     ...drinkFoodNames.map((name, i) => ({
+      _id: i + 300,
       addons: addOnsIds,
       category: drinkCategoryId,
       description:
@@ -197,19 +150,81 @@ async function bootstrap() {
       image: `https://source.unsplash.com/random/?food&plate&drink&${i}`,
       name,
       price: 10 + i * 2,
-      rank: i,
       published_at: new Date(),
     })),
     ...otherFoodNames.map((name, i) => ({
+      _id: i + 400,
       addons: addOnsIds,
       category: otherCategoryId,
       description: name + ' อร่อยมาก' + i + ' อร่อยมาก' + i + ' อร่อยมาก' + i,
       image: `https://source.unsplash.com/random/?food&plate&other&${i}`,
       name,
       price: 10 + i * 2,
-      rank: i,
       published_at: new Date(),
     })),
+  ]);
+
+  /////////////////////////////////// INSERT CATEGORY  ///////////////////////////////////
+
+  await categoriesModel.insertMany([
+    {
+      title: 'คาว',
+      description: 'อาหารคาว',
+      rank: 0,
+      menus: ['1', '6', '7', '4', '8', '9', '5', '2', '3'],
+      _id: mainCategoryId,
+    },
+    {
+      title: 'หวาน',
+      description: 'อาหารหวาน',
+      rank: 1,
+      menus: ['100', '101', '102', '103', '104', '105', '106', '107'],
+      _id: dessertCategoryId,
+    },
+    {
+      title: 'ผลไม้',
+      description: 'ผลไม้',
+      rank: 2,
+      menus: ['200', '201', '202', '203', '204', '205', '206'],
+      _id: fruitCategoryId,
+    },
+    {
+      title: 'เครื่องดื่ม',
+      description: 'เครื่องดื่ม',
+      rank: 3,
+      menus: ['300', '301', '302', '303', '304', '305', '306', '307'],
+      _id: drinkCategoryId,
+    },
+    {
+      title: 'อื่นๆ',
+      description: 'อื่นๆ',
+      rank: 4,
+      menus: ['400', '401', '402', '403'],
+      _id: otherCategoryId,
+    },
+  ]);
+
+  /////////////////////////////////// INSERT SESSION  ///////////////////////////////////
+
+  await sessionModel.insertMany([
+    {
+      table: 1,
+      uid: v4(),
+      finished_at: new Date(1),
+      _id: new Types.ObjectId(1),
+    },
+    {
+      table: 2,
+      uid: v4(),
+      finished_at: new Date(100),
+      _id: new Types.ObjectId(99),
+    },
+    {
+      table: 1,
+      uid: null,
+      finished_at: new Date(103),
+      _id: new Types.ObjectId(100),
+    },
   ]);
 
   await mongoose.disconnect();
