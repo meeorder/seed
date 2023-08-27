@@ -110,9 +110,25 @@ async function bootstrap() {
 
   const otherFoodNames = ['ถั่วทอด', 'ไข่ต้ม', 'ไข่เยี่ยวม้า', 'น้ำพริก'];
 
+  const mainFoodIds = mainFoodNames.map(
+    (name, idx) => new Types.ObjectId(3500 + idx),
+  );
+  const dessertFoodIds = dessertFoodNames.map(
+    (name, idx) => new Types.ObjectId(3600 + idx),
+  );
+  const fruitFoodIds = fruitFoodNames.map(
+    (name, idx) => new Types.ObjectId(3700 + idx),
+  );
+  const drinkFoodIds = drinkFoodNames.map(
+    (name, idx) => new Types.ObjectId(3800 + idx),
+  );
+  const otherFoodIds = otherFoodNames.map(
+    (name, idx) => new Types.ObjectId(3900 + idx),
+  );
+
   await menuModel.insertMany([
     ...mainFoodNames.map((name, i) => ({
-      _id: i + 1,
+      _id: mainFoodIds[i],
       addons: addOnsIds,
       category: mainCategoryId,
       description: name + ' อร่อยมาก' + i + ' อร่อยมาก' + i + ' อร่อยมาก' + i,
@@ -122,7 +138,7 @@ async function bootstrap() {
       published_at: new Date(),
     })),
     ...dessertFoodNames.map((name, i) => ({
-      _id: i + 100,
+      _id: dessertFoodIds[i],
       addons: addOnsIds,
       category: dessertCategoryId,
       description: name + ' หวานมาก' + i + ' หวานมาก' + i + ' หวานมาก' + i,
@@ -132,7 +148,7 @@ async function bootstrap() {
       published_at: new Date(),
     })),
     ...fruitFoodNames.map((name, i) => ({
-      _id: i + 200,
+      _id: fruitFoodIds[i],
       addons: addOnsIds,
       category: fruitCategoryId,
       description: name + ' กรอบมาก' + i + ' กรอบมาก' + i + ' กรอบมาก' + i,
@@ -142,7 +158,7 @@ async function bootstrap() {
       published_at: new Date(),
     })),
     ...drinkFoodNames.map((name, i) => ({
-      _id: i + 300,
+      _id: drinkFoodIds[i],
       addons: addOnsIds,
       category: drinkCategoryId,
       description:
@@ -153,7 +169,7 @@ async function bootstrap() {
       published_at: new Date(),
     })),
     ...otherFoodNames.map((name, i) => ({
-      _id: i + 400,
+      _id: otherFoodIds[i],
       addons: addOnsIds,
       category: otherCategoryId,
       description: name + ' อร่อยมาก' + i + ' อร่อยมาก' + i + ' อร่อยมาก' + i,
@@ -171,35 +187,35 @@ async function bootstrap() {
       title: 'คาว',
       description: 'อาหารคาว',
       rank: 0,
-      menus: ['1', '6', '7', '4', '8', '9', '5', '2', '3'],
+      menus: mainFoodIds,
       _id: mainCategoryId,
     },
     {
       title: 'หวาน',
       description: 'อาหารหวาน',
       rank: 1,
-      menus: ['100', '101', '102', '103', '104', '105', '106', '107'],
+      menus: dessertFoodIds,
       _id: dessertCategoryId,
     },
     {
       title: 'ผลไม้',
       description: 'ผลไม้',
       rank: 2,
-      menus: ['200', '201', '202', '203', '204', '205', '206'],
+      menus: fruitFoodIds,
       _id: fruitCategoryId,
     },
     {
       title: 'เครื่องดื่ม',
       description: 'เครื่องดื่ม',
       rank: 3,
-      menus: ['300', '301', '302', '303', '304', '305', '306', '307'],
+      menus: drinkFoodIds,
       _id: drinkCategoryId,
     },
     {
       title: 'อื่นๆ',
       description: 'อื่นๆ',
       rank: 4,
-      menus: ['400', '401', '402', '403'],
+      menus: otherFoodIds,
       _id: otherCategoryId,
     },
   ]);
