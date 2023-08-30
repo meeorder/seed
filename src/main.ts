@@ -1,247 +1,382 @@
-import { DocumentType, getModelForClass } from '@typegoose/typegoose';
-import { AddonSchema } from './schema/addons.schema';
-import { CategorySchema } from './schema/categories.schema';
-import { MenuSchema } from './schema/menus.schema';
-import { SessionSchema } from './schema/session.schema';
-import { TablesSchema } from './schema/tables.schema';
-import mongoose, { Types } from 'mongoose';
-import { v4 } from 'uuid';
-
-const addonModel = getModelForClass(AddonSchema);
-const categoriesModel = getModelForClass(CategorySchema);
-const menuModel = getModelForClass(MenuSchema);
-const sessionModel = getModelForClass(SessionSchema);
-const tableModel = getModelForClass(TablesSchema);
+import mongoose from 'mongoose';
+import {
+  createCategory,
+  getAllCategories,
+  replaceCategoryByIdAndData,
+  updateCategoryRankByIds,
+} from './services/categories';
+import { createAddon, getAllAddons } from './services/addons';
+import { createMenu, getAllMenus, publishMenuById } from './services/menus';
+import { createTable, getAllTables } from './services/tables';
+import { createSession, getAllSessions } from './services/sessions';
+import {
+  CreateOrderBodyParam,
+  createOrder,
+  getAllOrders,
+  setOrderStatusToDoneById,
+  setOrderStatusToPreparingById,
+  setOrderStatusToReadyToServeById,
+} from './services/orders';
 
 async function bootstrap() {
-  await mongoose.connect(process.env.MONGO_URI ?? 'mongodb://localhost:27017', {
-    dbName: process.env.MONGO_DB_NAME ?? 'meeorder',
+  await mongoose.connect(
+    process.env.MONGO_URI ??
+      'mongodb+srv://meeorder-ku:J6MqU8xBePxMG35O@meeorder.lzavilq.mongodb.net/?authMechanism=DEFAULT',
+    {
+      dbName: process.env.MONGO_DB_NAME ?? 'meeorder',
+    },
+  );
+  /////////////////////////////////// DROP DATABASE  ///////////////////////////////////
+  await mongoose.connection.db
+    .listCollections()
+    .toArray()
+    .then((collections) => {
+      collections.forEach(({ name }) => {
+        mongoose.connection.db.dropCollection(name);
+      });
+    });
+
+  /////////////////////////////////// MENU ADDON CATEGORY ///////////////////////////////////
+  const categories = [
+    'อาหารจานเดียว',
+    'กับข้าว',
+    'เครื่องดื่ม',
+    'ของหวาน',
+    'ผลไม้',
+    'ของทานเล่น',
+    'อื่นๆ',
+  ] as const;
+
+  const createCategoryPromises = categories.map((category) =>
+    createCategory({ title: category }),
+  );
+
+  console.log('try to create category');
+
+  await Promise.all(createCategoryPromises);
+
+  console.log('wait 1 sec');
+  await new Promise((resolve) => setTimeout(resolve, 1000));
+
+  const allCategories = await getAllCategories();
+
+  if (allCategories.length !== categories.length) {
+    throw new Error('create category failed');
+  }
+
+  console.log('create all categories success');
+
+  const categoryWithId = categories.map((category) => ({
+    _id: allCategories.find((c) => c.title === category)?._id,
+    title: category,
+  }));
+
+  await updateCategoryRankByIds({
+    rank: categoryWithId.map((data) => data._id),
   });
 
-  /////////////////////////////////// DROP DATABASE  ///////////////////////////////////
-  await mongoose.connection.db.dropDatabase();
+  const addons = ['ไข่ดาว', 'ไข่เจียว', 'ไข่ต้ม', 'ไข่เค็ม', 'ไข่เยี่ยวม้า'];
 
-  /////////////////////////////////// INSERT TABLE  ///////////////////////////////////
-  await tableModel.insertMany(
-    Array.from({ length: 10 }, (_, i) => i + 1).map((i) => ({ _id: i })),
+  const createAddonPromises = addons.map((addon, i) =>
+    createAddon({ title: addon, price: i * 5 }),
   );
 
-  /////////////////////////////////// INSERT ADDON  ///////////////////////////////////
-  const addonDocs: DocumentType<AddonSchema>[] = await addonModel.create(
-    {
-      title: 'เบคอน',
-      price: 3,
-    },
-    {
-      title: 'ไข่ดาว',
-      price: 2,
-    },
-    {
-      title: 'ไข่เจียว',
-      price: 1,
-    },
-    {
-      title: 'ไข่ต้ม',
-      price: 1,
-    },
-    {
-      title: 'ไข่เยี่ยวม้า',
-      price: 1,
-    },
-    {
-      title: 'ม้าลาย',
-      price: 10,
-    },
+  console.log('try to create addon');
+
+  await Promise.all(createAddonPromises);
+
+  console.log('wait 1 sec');
+  await new Promise((resolve) => setTimeout(resolve, 1000));
+
+  const allAddons = await getAllAddons();
+
+  if (allAddons.length !== addons.length) {
+    throw new Error('create addon failed');
+  }
+  console.log('create all addons success');
+
+  const addonWithId = addons.map((addon, index) => ({
+    _id: allAddons[index]._id,
+    title: addon,
+  }));
+
+  const dishes: Record<(typeof categories)[number], string[]> = {
+    อาหารจานเดียว: [
+      'ข้าวผัดกะเพราหมู',
+      'ข้าวผัดกะเพราไก่',
+      'ข้าวผัดกะเพราเนื้อ',
+      'ข้าวยำไก่ย่าง',
+      'ข้าวหมูทอดกระเทียม',
+      'ข้าวอบหมูแดง',
+    ],
+    กับข้าว: [
+      'กะเพราหมูกรอบ',
+      'กะเพราไก่กรอบ',
+      'กะเพราเนื้อกรอบ',
+      'ไก่ทอด',
+      'ไก่ทอดน้ำปลา',
+    ],
+    เครื่องดื่ม: ['น้ำเปล่า', 'น้ำอัดลม', 'น้ำผลไม้', 'น้ำส้ม', 'ชาเย็น'],
+    ของหวาน: ['ขนมปัง', 'ขนมเค้ก', 'ฟรุตสลัด', 'ไอศกรีม', 'เครป'],
+    ผลไม้: ['แอปเปิ้ล', 'ส้ม', 'กล้วย', 'ส้มโอ', 'มะละกอ'],
+    ของทานเล่น: ['หนังไก่ทอด', 'ไส้กรอกทอด', 'เฟรนฟราย', 'เกี๊ยวทอด'],
+    อื่นๆ: ['ข้าวเหนียว', 'ข้าวเปล่า', 'ขนมจีน'],
+  };
+
+  const createDishPromises = Object.entries(dishes).map(
+    ([category, dishList]) =>
+      Promise.all(
+        dishList.map((dish, i) =>
+          createMenu({
+            title: dish,
+            description: dish + 'description' + category,
+            price: i * 5,
+            category: categoryWithId.find((c) => c.title === category)?._id,
+            addons: addonWithId.map((addon) => addon._id),
+            image: 'https://source.unsplash.com/random/?food&plate&' + i,
+          }),
+        ),
+      ),
   );
 
-  const addOnsIds = addonDocs.map((doc) => doc._id);
+  console.log('try to create menu');
 
-  const mainCategoryId = new Types.ObjectId(3000);
-  const dessertCategoryId = new Types.ObjectId(3001);
-  const fruitCategoryId = new Types.ObjectId(3002);
-  const drinkCategoryId = new Types.ObjectId(3003);
-  const otherCategoryId = new Types.ObjectId(3004);
+  await Promise.all(createDishPromises);
 
-  /////////////////////////////////// INSERT MENU  ///////////////////////////////////
+  console.log('wait 1 sec');
+  await new Promise((resolve) => setTimeout(resolve, 1000));
 
-  const mainFoodNames = [
-    'ข้าวผัดกะเพราหมูกรอบ',
-    'ข้าวไข่เจียวหมูสับ',
-    'ข้าวผัดหมู',
-    'ข้าวผัดกุ้ง',
-    'ข้าวผัดกุ้งทะเล',
-    'ข้าวผัดปู',
-    'ไก่ผัดกระเทียม',
-    'หมูผัดกระเทียม',
-    'หมูผัดพริกเผา',
+  const allMenuList = await getAllMenus({
+    status: 'all',
+  });
+
+  if (
+    allMenuList.length !== categories.length ||
+    allMenuList.map((categoryWithMenu) => categoryWithMenu.menus).flat()
+      .length !== Object.values(dishes).flat().length
+  ) {
+    throw new Error('create menu failed');
+  }
+
+  console.log('create all menu success');
+
+  const allMenu = allMenuList
+    .map((categoryWithMenu) => categoryWithMenu.menus)
+    .flat();
+
+  const publishMenuPromises = allMenu.map((menu) =>
+    publishMenuById({
+      id: menu._id,
+    }),
+  );
+
+  console.log('try to publish menu');
+
+  await Promise.all(publishMenuPromises);
+
+  console.log('wait 1 sec');
+  await new Promise((resolve) => setTimeout(resolve, 1000));
+
+  const allPublishedMenu = await getAllMenus({
+    status: 'published',
+  });
+
+  if (
+    allPublishedMenu.length !== categories.length ||
+    allPublishedMenu.map((categoryWithMenu) => categoryWithMenu.menus).flat()
+      .length !== Object.values(dishes).flat().length
+  ) {
+    throw new Error('publish menu failed');
+  }
+
+  console.log('publish all menu success');
+
+  const replaceCategoryPromises = categoryWithId.map((category, idx) =>
+    replaceCategoryByIdAndData({
+      id: category._id,
+      title: category.title,
+      rank: idx,
+      menus: allPublishedMenu
+        .filter(
+          (categoryWithMenu) => categoryWithMenu.category._id === category._id,
+        )
+        .map((categoryWithMenu) => categoryWithMenu.menus)
+        .flat()
+        .map((menu) => menu._id),
+    }),
+  );
+
+  console.log('try to replace category');
+
+  await Promise.all(replaceCategoryPromises);
+
+  console.log('wait 1 sec');
+  await new Promise((resolve) => setTimeout(resolve, 1000));
+
+  const allCategory = await getAllCategories();
+
+  if (
+    allCategory.length !== categories.length ||
+    allCategory.map((category) => category.menus).flat().length !==
+      Object.values(dishes).flat().length
+  ) {
+    throw new Error('replace category failed');
+  }
+
+  console.log('replace all category success');
+
+  const newMenu = await getAllMenus({
+    status: 'published',
+  });
+
+  if (
+    newMenu.length !== categories.length ||
+    newMenu.map((categoryWithMenu) => categoryWithMenu.menus).flat().length !==
+      Object.values(dishes).flat().length
+  ) {
+    throw new Error('replace category failed');
+  }
+  console.log('replace all menu success');
+
+  console.log(newMenu);
+
+  /////////////////////////////////// TABLE SESSION ORDER ///////////////////////////////////
+
+  console.log('wait 1 sec');
+  await new Promise((resolve) => setTimeout(resolve, 1000));
+
+  const tableNumbers = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+
+  const createTablePromises = tableNumbers.map((tableNumber) =>
+    createTable({
+      _id: tableNumber,
+    }),
+  );
+
+  console.log('try to create table');
+
+  await Promise.all(createTablePromises);
+
+  console.log('wait 1 sec');
+  await new Promise((resolve) => setTimeout(resolve, 1000));
+
+  const allTable = await getAllTables();
+
+  if (allTable.length !== tableNumbers.length) {
+    throw new Error('create table failed');
+  }
+
+  console.log('create all table success');
+
+  const newSessionTables = [1, 3, 5, 7, 9];
+
+  const newSessionTablePromises = newSessionTables.map((tableNumber) =>
+    createSession({
+      table: tableNumber,
+    }),
+  );
+
+  console.log('try to create session');
+
+  await Promise.all(newSessionTablePromises);
+
+  console.log('wait 1 sec');
+  await new Promise((resolve) => setTimeout(resolve, 1000));
+
+  const allSession = await getAllSessions({
+    finished: false,
+  });
+
+  if (allSession.length !== newSessionTables.length) {
+    throw new Error('create session failed');
+  }
+
+  console.log('create all session success');
+
+  console.log(allSession);
+
+  const orderForAllSession: CreateOrderBodyParam['orders'] = [
+    {
+      menu: allMenu[0]._id,
+      addons: [allAddons[0]._id, allAddons[1]._id],
+      additional_info: 'ไม่ใส่หอมให้หน่อย',
+    },
+    {
+      menu: allMenu[1]._id,
+      addons: [allAddons[2]._id, allAddons[3]._id],
+    },
+    {
+      menu: allMenu[2]._id,
+    },
+    {
+      menu: allMenu[3]._id,
+    },
   ];
 
-  const dessertFoodNames = [
-    'ข้าวเหนียวมะม่วง',
-    'ข้าวเหนียวทุเรียน',
-    'ข้าวเหนียวสังขยา',
-    'ไอศกรีม',
-    'เครป',
-    'เครปชีส',
-    'เครปสตรอเบอร์รี่',
-    'เครปช็อคโกแลต',
+  const createOrderPromises = allSession.map((session) =>
+    createOrder({
+      session: session._id,
+      orders: orderForAllSession,
+    }),
+  );
+
+  console.log('try to create order');
+
+  await Promise.all(createOrderPromises);
+
+  console.log('wait 1 sec');
+  await new Promise((resolve) => setTimeout(resolve, 1000));
+
+  const allOrder = await getAllOrders();
+
+  if (allOrder.length !== allSession.length * orderForAllSession.length) {
+    throw new Error('create order failed');
+  }
+
+  console.log('create all order success');
+
+  console.log(allOrder);
+
+  const statusForAllOrder: (typeof allOrder)[number]['status'][] = [
+    'PREPARING',
+    'IN_QUEUE',
+    'READY_TO_SERVE',
+    'DONE',
   ];
 
-  const fruitFoodNames = [
-    'มะละกอ',
-    'มะม่วง',
-    'ทุเรียน',
-    'ส้ม',
-    'ส้มโอ',
-    'แตงโม',
-    'กล้วย',
-  ];
-
-  const drinkFoodNames = [
-    'น้ำเปล่า',
-    'น้ำอัดลม',
-    'น้ำส้ม',
-    'โค้ก',
-    'ชา',
-    'ชาเย็น',
-    'ชานม',
-    'ชามะนาว',
-  ];
-
-  const otherFoodNames = ['ถั่วทอด', 'ไข่ต้ม', 'ไข่เยี่ยวม้า', 'น้ำพริก'];
-
-  const mainFoodIds = mainFoodNames.map(
-    (name, idx) => new Types.ObjectId(3500 + idx),
-  );
-  const dessertFoodIds = dessertFoodNames.map(
-    (name, idx) => new Types.ObjectId(3600 + idx),
-  );
-  const fruitFoodIds = fruitFoodNames.map(
-    (name, idx) => new Types.ObjectId(3700 + idx),
-  );
-  const drinkFoodIds = drinkFoodNames.map(
-    (name, idx) => new Types.ObjectId(3800 + idx),
-  );
-  const otherFoodIds = otherFoodNames.map(
-    (name, idx) => new Types.ObjectId(3900 + idx),
+  const updateOrderPromises = allOrder.map((order, idx) =>
+    [
+      setOrderStatusToPreparingById,
+      setOrderStatusToReadyToServeById,
+      setOrderStatusToDoneById,
+      () => {
+        return Promise.resolve();
+      },
+    ][idx % 4]({
+      id: order._id,
+    }),
   );
 
-  await menuModel.insertMany([
-    ...mainFoodNames.map((name, i) => ({
-      _id: mainFoodIds[i],
-      addons: addOnsIds,
-      category: mainCategoryId,
-      description: name + ' อร่อยมาก' + i + ' อร่อยมาก' + i + ' อร่อยมาก' + i,
-      image: `https://source.unsplash.com/random/?food&plate&main&${i}`,
-      title: name,
-      price: 35 + i * 5,
-      published_at: new Date(),
-    })),
-    ...dessertFoodNames.map((name, i) => ({
-      _id: dessertFoodIds[i],
-      addons: addOnsIds,
-      category: dessertCategoryId,
-      description: name + ' หวานมาก' + i + ' หวานมาก' + i + ' หวานมาก' + i,
-      image: `https://source.unsplash.com/random/?food&plate&dessert&${i}`,
-      title: name,
-      price: 10 + i * 2,
-      published_at: new Date(),
-    })),
-    ...fruitFoodNames.map((name, i) => ({
-      _id: fruitFoodIds[i],
-      addons: addOnsIds,
-      category: fruitCategoryId,
-      description: name + ' กรอบมาก' + i + ' กรอบมาก' + i + ' กรอบมาก' + i,
-      image: `https://source.unsplash.com/random/?food&plate&fruit&${i}`,
-      title: name,
-      price: 20 + i * 3,
-      published_at: new Date(),
-    })),
-    ...drinkFoodNames.map((name, i) => ({
-      _id: drinkFoodIds[i],
-      addons: addOnsIds,
-      category: drinkCategoryId,
-      description:
-        name + ' สดชื่นมาก' + i + ' สดชื่นมาก' + i + ' สดชื่นมาก' + i,
-      image: `https://source.unsplash.com/random/?food&plate&drink&${i}`,
-      title: name,
-      price: 10 + i * 2,
-      published_at: new Date(),
-    })),
-    ...otherFoodNames.map((name, i) => ({
-      _id: otherFoodIds[i],
-      addons: addOnsIds,
-      category: otherCategoryId,
-      description: name + ' อร่อยมาก' + i + ' อร่อยมาก' + i + ' อร่อยมาก' + i,
-      image: `https://source.unsplash.com/random/?food&plate&other&${i}`,
-      title: name,
-      price: 10 + i * 2,
-      published_at: new Date(),
-    })),
-  ]);
+  console.log('try to update order');
 
-  /////////////////////////////////// INSERT CATEGORY  ///////////////////////////////////
+  await Promise.all(updateOrderPromises);
 
-  await categoriesModel.insertMany([
-    {
-      title: 'คาว',
-      description: 'อาหารคาว',
-      rank: 0,
-      menus: mainFoodIds,
-      _id: mainCategoryId,
-    },
-    {
-      title: 'หวาน',
-      description: 'อาหารหวาน',
-      rank: 1,
-      menus: dessertFoodIds,
-      _id: dessertCategoryId,
-    },
-    {
-      title: 'ผลไม้',
-      description: 'ผลไม้',
-      rank: 2,
-      menus: fruitFoodIds,
-      _id: fruitCategoryId,
-    },
-    {
-      title: 'เครื่องดื่ม',
-      description: 'เครื่องดื่ม',
-      rank: 3,
-      menus: drinkFoodIds,
-      _id: drinkCategoryId,
-    },
-    {
-      title: 'อื่นๆ',
-      description: 'อื่นๆ',
-      rank: 4,
-      menus: otherFoodIds,
-      _id: otherCategoryId,
-    },
-  ]);
+  console.log('wait 1 sec');
+  await new Promise((resolve) => setTimeout(resolve, 1000));
 
-  /////////////////////////////////// INSERT SESSION  ///////////////////////////////////
+  const allUpdatedOrder = await getAllOrders();
 
-  await sessionModel.insertMany([
-    {
-      table: 1,
-      uid: v4(),
-      finished_at: new Date(1),
-      _id: new Types.ObjectId(1),
-    },
-    {
-      table: 2,
-      uid: v4(),
-      finished_at: new Date(100),
-      _id: new Types.ObjectId(99),
-    },
-    {
-      table: 1,
-      uid: null,
-      finished_at: new Date(103),
-      _id: new Types.ObjectId(100),
-    },
-  ]);
+  if (
+    allUpdatedOrder.length !== allSession.length * orderForAllSession.length ||
+    new Set(allUpdatedOrder.map((order) => order.status)).size !==
+      statusForAllOrder.length
+  ) {
+    throw new Error('update order failed');
+  }
+
+  console.log('update all order success');
+
+  console.log(allUpdatedOrder);
 
   await mongoose.disconnect();
 }

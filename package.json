@@ -6,10 +6,13 @@
   "private": true,
   "license": "UNLICENSED",
   "scripts": {
-    "seed": "ts-node ./src/main.ts"
+    "gen": "npx openapi-typescript ./swagger.json -o ./src/schema/schema.d.ts",
+    "seed": "ts-node ./src/main.ts",
+    "gen-seed": "pnpm gen && ts-node ./src/main.ts"
   },
   "dependencies": {
     "@typegoose/typegoose": "^11.4.0",
+    "axios": "^1.5.0",
     "mongoose": "^7.4.1",
     "reflect-metadata": "^0.1.13",
     "rxjs": "^7.8.1",
