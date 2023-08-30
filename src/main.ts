@@ -17,15 +17,12 @@ import {
   setOrderStatusToPreparingById,
   setOrderStatusToReadyToServeById,
 } from './services/orders';
+import 'dotenv/config';
 
 async function bootstrap() {
-  await mongoose.connect(
-    process.env.MONGO_URI ??
-      'mongodb+srv://meeorder-ku:J6MqU8xBePxMG35O@meeorder.lzavilq.mongodb.net/?authMechanism=DEFAULT',
-    {
-      dbName: process.env.MONGO_DB_NAME ?? 'meeorder',
-    },
-  );
+  await mongoose.connect(process.env.MONGO_URI ?? 'mongodb://localhost:27017', {
+    dbName: process.env.MONGO_DB_NAME ?? 'meeorder',
+  });
   /////////////////////////////////// DROP DATABASE  ///////////////////////////////////
   await mongoose.connection.db
     .listCollections()
