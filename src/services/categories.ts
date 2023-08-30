@@ -57,11 +57,7 @@ export const replaceCategoryByIdAndData = async (
 ): Promise<ReplaceCategoryByIdAndDataResponse> => {
   const { data } = await axiosInstance.put<ReplaceCategoryByIdAndDataResponse>(
     `/categories/${params.id}`,
-    {
-      title: params.title,
-      menus: params.menus,
-      rank: params.rank,
-    },
+    params,
   );
   return data;
 };
