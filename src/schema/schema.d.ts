@@ -3,83 +3,107 @@
  * Do not make direct changes to the file.
  */
 
+
 export interface paths {
-  '/health/ping': {
-    get: operations['HealthController_getPing'];
+  "/health/ping": {
+    get: operations["HealthController_getPing"];
   };
-  '/categories': {
-    get: operations['CategoriesController_getAllCategories'];
-    post: operations['CategoriesController_createCategory'];
+  "/categories": {
+    get: operations["CategoriesController_getAllCategories"];
+    post: operations["CategoriesController_createCategory"];
   };
-  '/categories/{id}': {
-    get: operations['CategoriesController_getCategory'];
-    put: operations['CategoriesController_updateCategory'];
-    delete: operations['CategoriesController_deleteCategory'];
+  "/categories/{id}": {
+    get: operations["CategoriesController_getCategory"];
+    put: operations["CategoriesController_updateCategory"];
+    delete: operations["CategoriesController_deleteCategory"];
   };
-  '/categories/rank': {
-    patch: operations['CategoriesController_updateRank'];
+  "/categories/rank": {
+    patch: operations["CategoriesController_updateRank"];
   };
-  '/addons': {
-    get: operations['AddonsController_getAllAddons'];
-    post: operations['AddonsController_createAddon'];
+  "/addons": {
+    get: operations["AddonsController_getAllAddons"];
+    post: operations["AddonsController_createAddon"];
   };
-  '/addons/{id}': {
-    get: operations['AddonsController_getAddon'];
-    put: operations['AddonsController_updateAddon'];
-    delete: operations['AddonsController_deleteAddon'];
+  "/addons/{id}": {
+    get: operations["AddonsController_getAddon"];
+    put: operations["AddonsController_updateAddon"];
+    delete: operations["AddonsController_deleteAddon"];
   };
-  '/menus': {
-    get: operations['MenusController_getMenus'];
-    post: operations['MenusController_createMenu'];
-    delete: operations['MenusController_removeMenus'];
+  "/menus": {
+    get: operations["MenusController_getMenus"];
+    post: operations["MenusController_createMenu"];
+    delete: operations["MenusController_removeMenus"];
   };
-  '/menus/{id}': {
-    get: operations['MenusController_getMenuById'];
-    put: operations['MenusController_updateMenuById'];
-    delete: operations['MenusController_removeMenuById'];
+  "/menus/{id}": {
+    get: operations["MenusController_getMenuById"];
+    put: operations["MenusController_updateMenuById"];
+    delete: operations["MenusController_removeMenuById"];
   };
-  '/menus/{id}/publish': {
-    patch: operations['MenusController_publishMenuById'];
+  "/menus/{id}/publish": {
+    patch: operations["MenusController_publishMenuById"];
   };
-  '/menus/{id}/unpublish': {
-    patch: operations['MenusController_unpublishMenuById'];
+  "/menus/{id}/unpublish": {
+    patch: operations["MenusController_unpublishMenuById"];
   };
-  '/orders': {
-    get: operations['OrdersController_getOrders'];
-    post: operations['OrdersController_createOrder'];
+  "/orders": {
+    get: operations["OrdersController_getOrders"];
+    post: operations["OrdersController_createOrder"];
   };
-  '/orders/{id}/preparing': {
-    patch: operations['OrdersController_preparing'];
+  "/orders/{id}/preparing": {
+    patch: operations["OrdersController_preparing"];
   };
-  '/orders/{id}/ready_to_serve': {
-    patch: operations['OrdersController_readyToServe'];
+  "/orders/{id}/ready_to_serve": {
+    patch: operations["OrdersController_readyToServe"];
   };
-  '/orders/{id}/done': {
-    patch: operations['OrdersController_done'];
+  "/orders/{id}/done": {
+    patch: operations["OrdersController_done"];
   };
-  '/orders/{id}/cancel': {
-    patch: operations['OrdersController_cancel'];
+  "/orders/{id}/cancel": {
+    patch: operations["OrdersController_cancel"];
   };
-  '/sessions': {
-    get: operations['SessionController_getSessions'];
-    post: operations['SessionController_createSession'];
+  "/sessions": {
+    get: operations["SessionController_getSessions"];
+    post: operations["SessionController_createSession"];
   };
-  '/sessions/{id}': {
-    get: operations['SessionController_getSession'];
-    delete: operations['SessionController_deleteSession'];
+  "/sessions/{id}": {
+    get: operations["SessionController_getSession"];
+    delete: operations["SessionController_deleteSession"];
   };
-  '/sessions/table/{id}': {
-    get: operations['SessionController_getSessionByTable'];
+  "/sessions/table/{id}": {
+    get: operations["SessionController_getSessionByTable"];
   };
-  '/sessions/{id}/finish': {
-    patch: operations['SessionController_finishSession'];
+  "/sessions/{id}/finish": {
+    patch: operations["SessionController_finishSession"];
   };
-  '/sessions/{id}/orders': {
-    get: operations['SessionController_getOrdersBySession'];
+  "/sessions/{id}/orders": {
+    get: operations["SessionController_getOrdersBySession"];
   };
-  '/tables': {
-    get: operations['TablesController_getTables'];
-    post: operations['TablesController_createTable'];
+  "/tables": {
+    get: operations["TablesController_getTables"];
+    post: operations["TablesController_createTable"];
+  };
+  "/auth/login": {
+    post: operations["AuthController_signIn"];
+  };
+  "/auth/logout": {
+    post: operations["AuthController_signOut"];
+  };
+  "/users": {
+    get: operations["UsersController_getUsers"];
+    post: operations["UsersController_createUser"];
+    delete: operations["UsersController_deleteUser"];
+  };
+  "/users/reset_password": {
+    post: operations["UsersController_updateUser"];
+  };
+  "/coupons": {
+    get: operations["CouponsController_findAll"];
+    post: operations["CouponsController_create"];
+  };
+  "/coupons/{id}": {
+    get: operations["CouponsController_findOne"];
+    delete: operations["CouponsController_remove"];
+    patch: operations["CouponsController_update"];
   };
 }
 
@@ -126,15 +150,15 @@ export interface components {
       description: string;
       price: number;
       category: string;
-      addons: components['schemas']['AddonSchema'][];
+      addons: components["schemas"]["AddonSchema"][];
       /** Format: date-time */
       published_at: string;
       /** Format: date-time */
       deleted_at: string;
     };
     GetAllMenuResponseDto: {
-      category: components['schemas']['CategorySchema'];
-      menus: components['schemas']['GetMenuByIdResponseDto'][];
+      category: components["schemas"]["CategorySchema"];
+      menus: components["schemas"]["GetMenuByIdResponseDto"][];
     };
     CreateMenuDto: {
       image: string;
@@ -168,7 +192,7 @@ export interface components {
     CreateOrderDto: {
       /** @description session is ObjectID */
       session: string;
-      orders: components['schemas']['Orders'][];
+      orders: components["schemas"]["Orders"][];
     };
     SessionSchema: {
       /** @description Session ID */
@@ -194,7 +218,7 @@ export interface components {
       /** Format: date-time */
       created_at: string;
       /** @enum {string} */
-      status: 'IN_QUEUE' | 'PREPARING' | 'READY_TO_SERVE' | 'DONE';
+      status: "IN_QUEUE" | "PREPARING" | "READY_TO_SERVE" | "DONE";
       /** @description Array of MenuID */
       addons: string[];
       /** @description Additional info */
@@ -204,8 +228,8 @@ export interface components {
        * @description for cancel status
        */
       cancelled_at: string;
-      session: components['schemas']['SessionSchema'];
-      menu: components['schemas']['MenuSchema'];
+      session: components["schemas"]["SessionSchema"];
+      menu: components["schemas"]["MenuSchema"];
     };
     CreateSessionDto: {
       /** @description User ID */
@@ -213,11 +237,107 @@ export interface components {
       /** @description Table ID */
       table: number;
     };
+    OrdersResponseDto: {
+      /** @description Order ID (ObjectID) */
+      _id: string;
+      /** Format: date-time */
+      created_at: string;
+      /** @enum {string} */
+      status: "IN_QUEUE" | "PREPARING" | "READY_TO_SERVE" | "DONE";
+      /** @description Session Schema */
+      session: components["schemas"]["SessionSchema"];
+      /** @description Menu Schema */
+      menu: components["schemas"]["MenuSchema"];
+      /** @description Array of Addons Schema */
+      addons: components["schemas"]["AddonSchema"][];
+      /** @description Additional info */
+      additional_info: string;
+      /**
+       * Format: date-time
+       * @description for cancel status
+       */
+      cancelled_at: string;
+    };
+    OrdersListDto: {
+      /** @description table number */
+      table: number;
+      /** @description total price */
+      total_price: number;
+      /** @description discount price */
+      discount_price: number;
+      /** @description net price */
+      net_price: number;
+      orders: components["schemas"]["OrdersResponseDto"][];
+    };
     TablesDto: {
       _id: number;
     };
     TablesSchema: {
       _id: number;
+    };
+    LoginDto: {
+      username: string;
+      password: string;
+    };
+    CreateUserDto: {
+      /** @description username is string */
+      username: string;
+      /** @description password is string */
+      password: string;
+      /**
+       * @description select role from enum UserRole example: Owner, Chef, Cashier, Employee, Customer
+       * @example [
+       *   "Owner",
+       *   "Chef",
+       *   "Cashier",
+       *   "Employee",
+       *   "Customer"
+       * ]
+       * @enum {number}
+       */
+      role: 100 | 75 | 50 | 25 | 1;
+    };
+    UserSchema: {
+      _id: string;
+      username: string;
+      point: number;
+      /** @enum {number} */
+      role: 100 | 75 | 50 | 25 | 1;
+      /**
+       * Format: date-time
+       * @default 2023-09-03T10:05:35.534Z
+       */
+      created_at: string;
+    };
+    CreateCouponDto: {
+      /** @description Coupon Code */
+      title: string;
+      /** @description Coupon Description */
+      description?: string;
+      required_menus?: string[];
+      /** @description Discount Price of Coupon */
+      price: number;
+      /** @description Amount of Coupon */
+      amount?: number;
+      /** @description Coupon status */
+      activated: number;
+      /** @description Coupon Required Point */
+      required_point?: number;
+    };
+    UpdateCouponDto: {
+      /** @description Coupon Code */
+      title?: string;
+      /** @description Coupon Description */
+      description?: string;
+      required_menus?: string[];
+      /** @description Discount Price of Coupon */
+      price?: number;
+      /** @description Amount of Coupon */
+      amount?: number;
+      /** @description Coupon status */
+      activated?: number;
+      /** @description Coupon Required Point */
+      required_point?: number;
     };
   };
   responses: never;
@@ -230,12 +350,13 @@ export interface components {
 export type external = Record<string, never>;
 
 export interface operations {
+
   HealthController_getPing: {
     responses: {
       /** @description Health status */
       200: {
         content: {
-          'application/json': components['schemas']['HealthResponseDto'];
+          "application/json": components["schemas"]["HealthResponseDto"];
         };
       };
     };
@@ -245,7 +366,7 @@ export interface operations {
       /** @description Get all categories */
       200: {
         content: {
-          'application/json': components['schemas']['CategorySchema'][];
+          "application/json": components["schemas"]["CategorySchema"][];
         };
       };
     };
@@ -253,14 +374,14 @@ export interface operations {
   CategoriesController_createCategory: {
     requestBody: {
       content: {
-        'application/json': components['schemas']['CreateCategoryDto'];
+        "application/json": components["schemas"]["CreateCategoryDto"];
       };
     };
     responses: {
       /** @description Created new category */
       201: {
         content: {
-          'application/json': components['schemas']['CreateCategoryDto'];
+          "application/json": components["schemas"]["CreateCategoryDto"];
         };
       };
     };
@@ -275,7 +396,7 @@ export interface operations {
       /** @description Get category by ID */
       200: {
         content: {
-          'application/json': components['schemas']['CategorySchema'];
+          "application/json": components["schemas"]["CategorySchema"];
         };
       };
       /** @description Category not found */
@@ -290,14 +411,14 @@ export interface operations {
     };
     requestBody: {
       content: {
-        'application/json': components['schemas']['UpdateCategoryDto'];
+        "application/json": components["schemas"]["UpdateCategoryDto"];
       };
     };
     responses: {
       /** @description Update category */
       200: {
         content: {
-          'application/json': components['schemas']['UpdateCategoryDto'];
+          "application/json": components["schemas"]["UpdateCategoryDto"];
         };
       };
       /** @description Category not found */
@@ -320,7 +441,7 @@ export interface operations {
   CategoriesController_updateRank: {
     requestBody: {
       content: {
-        'application/json': components['schemas']['RankDto'];
+        "application/json": components["schemas"]["RankDto"];
       };
     };
     responses: {
@@ -333,7 +454,7 @@ export interface operations {
       /** @description Get all addons */
       200: {
         content: {
-          'application/json': components['schemas']['AddonSchema'][];
+          "application/json": components["schemas"]["AddonSchema"][];
         };
       };
     };
@@ -341,14 +462,14 @@ export interface operations {
   AddonsController_createAddon: {
     requestBody: {
       content: {
-        'application/json': components['schemas']['CreateAddonDto'];
+        "application/json": components["schemas"]["CreateAddonDto"];
       };
     };
     responses: {
       /** @description Created addon */
       201: {
         content: {
-          'application/json': components['schemas']['CreateAddonDto'];
+          "application/json": components["schemas"]["CreateAddonDto"];
         };
       };
     };
@@ -363,7 +484,7 @@ export interface operations {
       /** @description Get addon by Id */
       200: {
         content: {
-          'application/json': components['schemas']['AddonSchema'];
+          "application/json": components["schemas"]["AddonSchema"];
         };
       };
       /** @description Addon not found */
@@ -378,14 +499,14 @@ export interface operations {
     };
     requestBody: {
       content: {
-        'application/json': components['schemas']['CreateAddonDto'];
+        "application/json": components["schemas"]["CreateAddonDto"];
       };
     };
     responses: {
       /** @description Updated addon */
       200: {
         content: {
-          'application/json': components['schemas']['CreateAddonDto'];
+          "application/json": components["schemas"]["CreateAddonDto"];
         };
       };
       /** @description Addon not found */
@@ -408,14 +529,14 @@ export interface operations {
   MenusController_getMenus: {
     parameters: {
       query: {
-        status: 'published' | 'draft' | 'all';
+        status: "published" | "draft" | "all";
       };
     };
     responses: {
       /** @description Get all menus */
       200: {
         content: {
-          'application/json': components['schemas']['GetAllMenuResponseDto'][];
+          "application/json": components["schemas"]["GetAllMenuResponseDto"][];
         };
       };
     };
@@ -423,14 +544,14 @@ export interface operations {
   MenusController_createMenu: {
     requestBody: {
       content: {
-        'application/json': components['schemas']['CreateMenuDto'];
+        "application/json": components["schemas"]["CreateMenuDto"];
       };
     };
     responses: {
       /** @description The menu has been successfully created. */
       201: {
         content: {
-          'application/json': components['schemas']['MenuSchema'];
+          "application/json": components["schemas"]["MenuSchema"];
         };
       };
     };
@@ -458,7 +579,7 @@ export interface operations {
       /** @description Get menu by id */
       200: {
         content: {
-          'application/json': components['schemas']['GetMenuByIdResponseDto'];
+          "application/json": components["schemas"]["GetMenuByIdResponseDto"];
         };
       };
       /** @description No menu found */
@@ -473,7 +594,7 @@ export interface operations {
     };
     requestBody: {
       content: {
-        'application/json': components['schemas']['CreateMenuDto'];
+        "application/json": components["schemas"]["CreateMenuDto"];
       };
     };
     responses: {
@@ -527,7 +648,7 @@ export interface operations {
       /** @description Get all orders */
       200: {
         content: {
-          'application/json': components['schemas']['OrderGetDto'][];
+          "application/json": components["schemas"]["OrderGetDto"][];
         };
       };
     };
@@ -535,7 +656,7 @@ export interface operations {
   OrdersController_createOrder: {
     requestBody: {
       content: {
-        'application/json': components['schemas']['CreateOrderDto'];
+        "application/json": components["schemas"]["CreateOrderDto"];
       };
     };
     responses: {
@@ -601,7 +722,7 @@ export interface operations {
       /** @description Sessions list */
       200: {
         content: {
-          'application/json': components['schemas']['SessionSchema'][];
+          "application/json": components["schemas"]["SessionSchema"][];
         };
       };
     };
@@ -609,14 +730,14 @@ export interface operations {
   SessionController_createSession: {
     requestBody: {
       content: {
-        'application/json': components['schemas']['CreateSessionDto'];
+        "application/json": components["schemas"]["CreateSessionDto"];
       };
     };
     responses: {
       /** @description Session created */
       201: {
         content: {
-          'application/json': components['schemas']['SessionSchema'];
+          "application/json": components["schemas"]["SessionSchema"];
         };
       };
     };
@@ -632,7 +753,7 @@ export interface operations {
       /** @description Session */
       200: {
         content: {
-          'application/json': components['schemas']['SessionSchema'];
+          "application/json": components["schemas"]["SessionSchema"];
         };
       };
     };
@@ -662,7 +783,7 @@ export interface operations {
       /** @description Session */
       200: {
         content: {
-          'application/json': components['schemas']['SessionSchema'];
+          "application/json": components["schemas"]["SessionSchema"];
         };
       };
       /** @description No session found in the table */
@@ -691,7 +812,11 @@ export interface operations {
       };
     };
     responses: {
-      200: never;
+      200: {
+        content: {
+          "application/json": components["schemas"]["OrdersListDto"];
+        };
+      };
     };
   };
   TablesController_getTables: {
@@ -699,7 +824,7 @@ export interface operations {
       /** @description Get tables */
       200: {
         content: {
-          'application/json': components['schemas']['TablesSchema'][];
+          "application/json": components["schemas"]["TablesSchema"][];
         };
       };
     };
@@ -707,12 +832,147 @@ export interface operations {
   TablesController_createTable: {
     requestBody: {
       content: {
-        'application/json': components['schemas']['TablesDto'];
+        "application/json": components["schemas"]["TablesDto"];
       };
     };
     responses: {
       /** @description Create table */
       201: never;
+    };
+  };
+  AuthController_signIn: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["LoginDto"];
+      };
+    };
+    responses: {
+      204: never;
+    };
+  };
+  AuthController_signOut: {
+    responses: {
+      204: never;
+    };
+  };
+  UsersController_getUsers: {
+    parameters: {
+      query?: {
+        /** @description User role */
+        role?: string;
+      };
+    };
+    responses: {
+      /** @description Get users by roles */
+      200: {
+        content: {
+          "application/json": components["schemas"]["UserSchema"][];
+        };
+      };
+    };
+  };
+  UsersController_createUser: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CreateUserDto"];
+      };
+    };
+    responses: {
+      /** @description Create user */
+      201: never;
+    };
+  };
+  UsersController_deleteUser: {
+    parameters: {
+      query: {
+        /** @description User id (ObjectId) */
+        id: string;
+      };
+    };
+    responses: {
+      204: never;
+    };
+  };
+  UsersController_updateUser: {
+    parameters: {
+      query: {
+        /** @description User id (ObjectId) */
+        id: string;
+      };
+    };
+    responses: {
+      204: never;
+    };
+  };
+  CouponsController_findAll: {
+    responses: {
+      /** @description Get all coupons */
+      200: {
+        content: {
+          "application/json": components["schemas"];
+        };
+      };
+    };
+  };
+  CouponsController_create: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CreateCouponDto"];
+      };
+    };
+    responses: {
+      /** @description Coupon created */
+      201: {
+        content: {
+          "application/json": components["schemas"]["CreateCouponDto"];
+        };
+      };
+    };
+  };
+  CouponsController_findOne: {
+    parameters: {
+      path: {
+        id: string;
+      };
+    };
+    responses: {
+      /** @description Get all coupons */
+      200: {
+        content: {
+          "application/json": components["schemas"]["CreateCouponDto"];
+        };
+      };
+    };
+  };
+  CouponsController_remove: {
+    parameters: {
+      path: {
+        id: string;
+      };
+    };
+    responses: {
+      /** @description Coupon deleted */
+      200: never;
+    };
+  };
+  CouponsController_update: {
+    parameters: {
+      path: {
+        id: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["UpdateCouponDto"];
+      };
+    };
+    responses: {
+      /** @description Coupon updated */
+      200: {
+        content: {
+          "application/json": components["schemas"]["CreateCouponDto"];
+        };
+      };
     };
   };
 }
